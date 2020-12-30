@@ -4,6 +4,12 @@ class Portfolio:
     def __init__(self, *titles):
         self.titles = titles
 
+#TODO: the organization needs to be rearranged;
+# Saving plans need to be split up into single titles and differentiation between
+# titles with data from the internet and investment with known interest
+# otherwise there needs to be complicated de- and reconstruction done 
+
+
 # Base class for general investment as a part of the portfolio
 class Title:
     """Represents a general title in a portfolio"""
