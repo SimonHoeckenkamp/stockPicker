@@ -1,3 +1,6 @@
 #ignore the settings for vscode
 .vscode/
 
+# ignore database file
+*.db
+
