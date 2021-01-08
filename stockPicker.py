@@ -4,29 +4,88 @@ import hashlib
 
 import yfinance as yf
 
+
+class Database_Entry_Exception(Exception):
+    """A user-defined Exception for invalid access on database"""
+
+    def __init__(self, no_of_rows):
+        Exception.__init__(self)
+        self.no_of_rows = no_of_rows
+
 class User:
     """Represents user for stockPicker"""
 
+    # form of database:
+    # id, username, email, password
+
     # TODO: password needs to be hashed; here or before saving to database 
-    def __init__(self, username, email, password, portfolio=None):
+    # TODO: extend with portfolio information
+    #def __init__(self, username, email, password, portfolio=None):
+    def __init__(self, username, email, password, hashed_password=False):
         self.username = username
         self.email = email
-        self.password = password
-        self.portfolio = portfolio
+
+        # insert the hashed password
+        # TODO: use salting for making saving password safer against brute force attacks
+        if not hashed_password:
+            self.password = hashlib.sha256(str(password).encode("utf-8")).hexdigest()
+        else:
+            self.password = password
+
+        #self.portfolio = portfolio
+
+    #print data of User instance
+    def print_name(self):
+        print("User:", self.username, self.email, self.password)
 
     def save_to_db(self):
-        print("Yeah")
+        # connect to database and create a curser object for performing SQL commands
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
 
-    def add_portfolio(self, portfolio):
-        self.portfolio.append(portfolio)
+        # Create table (only for first access)
+        # comment out if db already exists
+        #c.execute('''CREATE TABLE users ('id' INTEGER PRIMARY KEY, 'username' VARCHAR(255), 'email' VARCHAR(255), 'password' VARCHAR(255))''')
+
+        #add user to the database
+        c.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", 
+                {'username':self.username, 'email':self.email, 'password':self.password})
+
+        # Save (commit) the changes
+        conn.commit()
+
+        # We can also close the connection if we are done with it.
+        # Just be sure any changes have been committed or they will be lost.
+        conn.close()
+
+        #return True
+
+    #def add_portfolio(self, portfolio):
+    #    self.portfolio.append(portfolio)
 
     @classmethod
     def get_user_from_db(cls, username, password):
+        # connect to database and create a curser object for performing SQL commands
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+
+        hashed_password = hashlib.sha256(str(password).encode("utf-8")).hexdigest()
+
+        rows = c.execute("SELECT * FROM users WHERE username=:username AND password=:password", 
+                        {"username": username, "password": hashed_password}).fetchall()
+
+        # Raise exception if no of users is invalid
+        if len(rows) != 1:
+            raise Database_Entry_Exception(len(rows))
+
+        conn.commit()
+        conn.close()
+
+        # # check no. of rows: if not one: ERROR
+        # if len(rows) != 1:
+        #     print("ERROR, there are", rows.rowcount, "corresponding entries in database 'users'")
         
-        #TODO: insert code for db request here
-
-        return cls
-
+        return cls(rows[0][1], rows[0][2], rows[0][3], hashed_password=True)
 
 #import stock_picker_module as sp
 
@@ -100,8 +159,55 @@ def get_portfolio(user_id, portfolio_id):
 def add_title_to_portfolio(portfolio_id, title_id):
     """Add title to portfolio - existing or not"""
 
-add_saving_plan_titles(calc_saving_plan_titles("MSFT", 50.00, "2000-02-01", "2000-02-02", 30))
-add_saving_plan_titles(calc_saving_plan_titles("MSFT", 50.00, "2000-02-01", "2020-05-12", 30))
+
+def test_function():
+    #create database
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+
+    #delete database before test to have a fresh start
+    c.execute('''DROP TABLE users''')
+    conn.commit()
+
+    # comment out if db already exists
+    c.execute('''CREATE TABLE users ('id' INTEGER PRIMARY KEY, 'username' VARCHAR(255), 'email' VARCHAR(255), 'password' VARCHAR(255))''')
+
+    # Save (commit) the changes
+    conn.commit()
+
+    # add first users
+    User("Jon", "Jon@web.com", "password1").save_to_db()
+    User("Jim", "Jim@web.com", "password2").save_to_db()
+    User("Joe", "Joe@web.com", "password3").save_to_db()
+    User("Tim", "Tim@web.com", "password4").save_to_db()
+    User("Carl", "Carl@web.com", "password5").save_to_db()
+    User("Jen", "Jen@web.com", "password6").save_to_db()
+
+    #test the entries
+    # for row in c.execute("SELECT * FROM users"):
+    #     for col in row:
+    #         print(col)
+
+    # We can also close the connection if we are done with it.
+    # Just be sure any changes have been committed or they will be lost.
+    conn.close()
+
+test_function()
+
+try:
+    new_user = User.get_user_from_db("Jon", "password1")
+    new_user.print_name()
+except Database_Entry_Exception as ex:
+    print("Database_Entry_Exception: Wrong Input - no users available")
+except IndexError:
+    print("IndexError")
+
+
+
+
+
+#add_saving_plan_titles(calc_saving_plan_titles("MSFT", 50.00, "2000-02-01", "2000-02-02", 30))
+#add_saving_plan_titles(calc_saving_plan_titles("MSFT", 50.00, "2000-02-01", "2020-05-12", 30))
 
 
 
