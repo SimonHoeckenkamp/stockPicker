@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <form action="/add" method="post">
+        <input id="title" name="title" type="text" placeholder="Title Name">
+        <input id="submit" type="submit" disabled>
+    </form>
+    <script>
+        document.querySelector('#title').onkeyup = function() {
+            if (document.querySelector('#title').value === '') {
+                document.querySelector('#submit').disabled = true;
+            } else {
+                document.querySelector('#submit').disabled = false;
+            }
+        }
+    </script>
+{% endblock %}

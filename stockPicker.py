@@ -1,9 +1,8 @@
-import sqlite3
-import datetime as datetime
-import hashlib
+import sqlite3  # connection to sqlite database
+import datetime as datetime # datetime for converting dates
+import hashlib  # hashing passwords in database
 
-import yfinance as yf
-
+import yfinance as yf   # API for stock ticker requests
 
 class Database_Entry_Exception(Exception):
     """A user-defined Exception for invalid access on database"""
@@ -21,7 +20,8 @@ class User:
     # TODO: password needs to be hashed; here or before saving to database 
     # TODO: extend with portfolio information
     #def __init__(self, username, email, password, portfolio=None):
-    def __init__(self, username, email, password, hashed_password=False):
+    def __init__(self, username, email, password, user_id=None, hashed_password=False):
+        self.user_id = user_id
         self.username = username
         self.email = email
 
@@ -36,16 +36,12 @@ class User:
 
     #print data of User instance
     def print_name(self):
-        print("User:", self.username, self.email, self.password)
+        print("User:", "ID:", self.user_id, " -- name:", self.username, " -- email", self.email, " -- password", self.password)
 
     def save_to_db(self):
         # connect to database and create a curser object for performing SQL commands
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-
-        # Create table (only for first access)
-        # comment out if db already exists
-        #c.execute('''CREATE TABLE users ('id' INTEGER PRIMARY KEY, 'username' VARCHAR(255), 'email' VARCHAR(255), 'password' VARCHAR(255))''')
 
         #add user to the database
         c.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", 
@@ -57,8 +53,6 @@ class User:
         # We can also close the connection if we are done with it.
         # Just be sure any changes have been committed or they will be lost.
         conn.close()
-
-        #return True
 
     #def add_portfolio(self, portfolio):
     #    self.portfolio.append(portfolio)
@@ -73,21 +67,35 @@ class User:
 
         rows = c.execute("SELECT * FROM users WHERE username=:username AND password=:password", 
                         {"username": username, "password": hashed_password}).fetchall()
-
+        conn.commit()
+        
         # Raise exception if no of users is invalid
         if len(rows) != 1:
             raise Database_Entry_Exception(len(rows))
 
-        conn.commit()
+        # close connection 
         conn.close()
-
-        # # check no. of rows: if not one: ERROR
-        # if len(rows) != 1:
-        #     print("ERROR, there are", rows.rowcount, "corresponding entries in database 'users'")
         
-        return cls(rows[0][1], rows[0][2], rows[0][3], hashed_password=True)
+        return cls(rows[0][1], rows[0][2], rows[0][3], user_id=rows[0][0], hashed_password=True)
 
-#import stock_picker_module as sp
+class Title:
+    """Represents title in portfolio e.g. a fraction of a fund or stocks"""
+
+    def __init__(self, name, buy_date, sell_date, amount):
+        self.name = name
+        self.buy_date = buy_date
+        self.sell_date = sell_date
+        self.amount = amount
+
+class Portfolio:
+    """Connects User to Titles, one User can join different Titles in one Portfolio"""
+    
+    def __init__(self, user_id, title_ids):
+        self.user_id = user_id
+        self.title_ids = title_ids
+
+    def add_title_to_portfolio(self, title_id):
+        self.title_ids.append(title_id)
 
 # the user has entries: user_id, username, portfolio
 # the portfolio has entries: portfolio_id, titles

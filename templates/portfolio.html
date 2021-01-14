@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <h1> Portfolio </h1>
+    <ul>
+        {% for title in titles %}
+            <li>{{ title }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="/add">Add new Title</a>
+
+    <a href="/users">Show the users</a>
+{% endblock %}
