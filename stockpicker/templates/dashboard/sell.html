@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Sell "{{ title['symbol'] }}"{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="symbol">Ticker Symbol</label>
+    <input name="symbol" id="symbol"
+      value="{{ request.form['symbol'] or title['symbol'] }}" required>
+    <label for="amount">Amount</label>
+    <textarea name="amount" id="amount">{{ request.form['amount'] or title['amount'] }}</textarea>
+    <input type="submit" value="Sell">
+  </form>
+  <hr>
+  <!--
+    Hier kommt eigentlich die Delete Funktion aus dem Tutorial, Seite und zugehörige Funktionen fehlen analog  
+    <form action="{{ url_for('dashboard.sell', id=post['id']) }}" method="post">
+    <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+  </form>-->
+{% endblock %}

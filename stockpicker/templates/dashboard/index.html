@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Portfolio - Dashboard{% endblock %}</h1>
+  {% if g.user %}
+    <a class="action" href="{{ url_for('dashboard.add_saving_plan') }}">Add Saving Plan</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% for title in titles %}
+    {% if g.user['id'] == title['owner_id'] %}
+      <div>
+        <ul> 
+          <li>{{ title['bought'] }}</li>
+          <li>{{ title['symbol'] }}</li>
+          <li>{{ title['amount'] }}</li>      
+        </ul>
+      </div>  
+    {% endif %}
+    {% if not loop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %}
+{% endblock %}

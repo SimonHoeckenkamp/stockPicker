@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Buy Stocks{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="symbol">Ticker Symbol</label>
+    <input name="symbol" id="symbol" value="{{ request.form['symbol'] }}" required>
+    <label for="bought">Buying date</label>
+    <input name="bought" id="bought" value="{{ request.form['bought'] }}" required>
+    <label for="amount">Amount</label>
+    <textarea name="amount" id="amount">{{ request.form['amount'] }}</textarea>
+    <input type="submit" value="Buy">
+  </form>
+{% endblock %}
