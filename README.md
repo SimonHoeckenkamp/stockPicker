@@ -1,4 +1,4 @@
-# stockPicker
+# stockPicker - UNDER CONSTRUCTION
 Tool for selecting stocks
 
 ## Collecting the data
