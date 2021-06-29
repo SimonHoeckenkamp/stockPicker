@@ -1,5 +1,5 @@
 # stockPicker - UNDER CONSTRUCTION
-Tool for selecting stocks
+Tool for selecting stocks inside of an flask web app
 
 ## Collecting the data
 The problem with analyzing stock data or balance sheets is the gathering of relevant data. Following Links sum up different sources of input
